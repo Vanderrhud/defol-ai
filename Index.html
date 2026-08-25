@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>DEFOL AI</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top App Bar -->
+  <header class="app-bar">
+    <div class="brand">
+      <span class="brand-badge">PRO</span>
+      <h1 class="brand-title">DEFOL AI</h1>
+    </div>
+    <div class="header-actions">
+      <span id="activeProviderBadge" class="provider-badge">OpenRouter</span>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="app-body">
+
+    <!-- ================= TAB 1: STUDIO (GENERATOR) ================= -->
+    <section id="tabStudio" class="tab-content active">
+      
+      <!-- Card Konfigurasi API -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Provider & API Key</span>
+        </div>
+
+        <div class="input-group">
+          <label for="providerSelect">Penyedia Layanan (Provider)</label>
+          <select id="providerSelect">
+            <option value="openrouter">OpenRouter API</option>
+            <option value="cometapi">Comet API</option>
+            <option value="custom">Custom Endpoint API</option>
+          </select>
+        </div>
+
+        <div class="input-group hidden" id="customUrlWrapper">
+          <label for="customUrlInput">Custom API Endpoint URL</label>
+          <input type="url" id="customUrlInput" placeholder="https://api.provider.com/v1/images/generations">
+        </div>
+
+        <div class="input-group">
+          <label for="apiKeyInput">API Key</label>
+          <div class="input-with-action">
+            <input type="password" id="apiKeyInput" placeholder="Masukkan API Key...">
+            <button type="button" id="toggleApiKeyBtn" class="btn-icon" title="Lihat/Sembunyikan Key">👁️</button>
+          </div>
+          <small class="helper-text">Key tersimpan aman di memori HP Anda.</small>
+        </div>
+      </div>
+
+      <!-- Card Parameter Model & Output -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Model & Parameter</span>
+          <a href="#" id="docLinkBtn" class="link-btn" target="_blank">ℹ Cek Info/Harga</a>
+        </div>
+
+        <div class="input-group">
+          <label for="modelSelect">Pilih Model AI</label>
+          <div class="input-with-action">
+            <select id="modelSelect">
+              <!-- Opsi model diisi otomatis oleh JavaScript -->
+            </select>
+            <button type="button" id="openModelModalBtn" class="btn-icon" title="Kelola Model Custom">⚙️</button>
+          </div>
+        </div>
+
+        <div class="grid-2-col">
+          <div class="input-group">
+            <label for="aspectRatioSelect">Rasio Ukuran</label>
+            <select id="aspectRatioSelect">
+              <option value="1:1" selected>1:1 (Square)</option>
+              <option value="9:16">9:16 (Story/TikTok/HP)</option>
+              <option value="16:9">16:9 (Landscape/PC)</option>
+              <option value="4:5">4:5 (Feed Instagram)</option>
+              <option value="3:4">3:4 (Portrait Klasik)</option>
+              <option value="4:3">4:3 (Landscape Klasik)</option>
+              <option value="21:9">21:9 (Cinematic)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="qualitySelect">Mode Kualitas / Biaya</label>
+            <select id="qualitySelect">
+              <option value="auto" selected>Auto (Bawaan Model)</option>
+              <option value="low">Hemat (Low / 512)</option>
+              <option value="standard">Standar (1K)</option>
+              <option value="hd">HD (2K / Maksimal)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Prompt Input -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Prompt Deskripsi</span>
+          <button type="button" id="clearPromptBtn" class="link-btn-danger">✖ Hapus Teks</button>
+        </div>
+
+        <div class="input-group">
+          <textarea id="promptInput" placeholder="Tuliskan deskripsi gambar yang ingin dibuat secara detail..."></textarea>
+        </div>
+
+        <button type="button" id="generateBtn" class="btn-primary">
+          <span id="btnGenerateText">Buat Gambar</span>
+          <div id="btnSpinner" class="spinner hidden"></div>
+        </button>
+
+        <div id="statusAlert" class="status-alert hidden"></div>
+      </div>
+
+      <!-- Card Hasil Generate Aktif -->
+      <div id="activeResultCard" class="card hidden">
+        <div class="card-header">
+          <span class="card-title">Hasil Gambar Terkini</span>
+          <button type="button" id="activeFavoriteBtn" class="btn-icon">⭐</button>
+        </div>
+
+        <div class="image-preview-container">
+          <img id="activeResultImg" src="" alt="Hasil Gambar AI">
+        </div>
+
+        <div class="btn-action-group">
+          <button type="button" id="activeDownloadBtn" class="btn-secondary">💾 Unduh</button>
+          <button type="button" id="activeShareBtn" class="btn-secondary">🔗 Bagikan</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= TAB 2: GALERI RIWAYAT ================= -->
+    <section id="tabGallery" class="tab-content">
+      
+      <div class="gallery-header">
+        <div>
+          <h2 class="gallery-title">Riwayat Gambar</h2>
+          <span id="galleryCount" class="gallery-subtitle">0 gambar tersimpan</span>
+        </div>
+        <button type="button" id="clearHistoryBtn" class="btn-danger-outline">Bersihkan</button>
+      </div>
+
+      <div id="galleryGrid" class="gallery-grid">
+        <!-- Item gambar diisi otomatis oleh JavaScript dari IndexedDB -->
+      </div>
+
+      <div id="emptyGalleryMsg" class="empty-state">
+        <span class="empty-icon">🖼️</span>
+        <p>Belum ada riwayat gambar.</p>
+        <small>Gambar yang Anda buat di Studio akan tersimpan otomatis di sini.</small>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= MODAL: DETAIL GAMBAR RIWAYAT ================= -->
+  <div id="imageDetailModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">Detail Gambar</span>
+        <button type="button" id="closeDetailModalBtn" class="btn-close">✕</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="modal-image-container">
+          <img id="modalDetailImg" src="" alt="Detail Gambar">
+        </div>
+
+        <div class="detail-meta">
+          <div class="meta-item">
+            <span class="meta-label">Model:</span>
+            <span id="modalModelText" class="meta-value">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Rasio:</span>
+            <span id="modalRatioText" class="meta-value">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Waktu:</span>
+            <span id="modalDateText" class="meta-value">-</span>
+          </div>
+        </div>
+
+        <div class="prompt-box">
+          <span class="prompt-label">Prompt:</span>
+          <p id="modalPromptText"></p>
+        </div>
+
+        <div class="modal-actions-grid">
+          <button type="button" id="modalReusePromptBtn" class="btn-secondary">🔄 Pakai Lagi</button>
+          <button type="button" id="modalCopyPromptBtn" class="btn-secondary">📋 Salin Prompt</button>
+          <button type="button" id="modalDownloadBtn" class="btn-secondary">💾 Unduh</button>
+          <button type="button" id="modalShareBtn" class="btn-secondary">🔗 Bagikan</button>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="button" id="modalToggleFavBtn" class="btn-favorite-outline">⭐ Tandai Favorit</button>
+          <button type="button" id="modalDeleteBtn" class="btn-danger-outline">🗑️ Hapus</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: KELOLA MODEL CUSTOM ================= -->
+  <div id="modelManagerModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">Kelola Model AI</span>
+        <button type="button" id="closeModelModalBtn" class="btn-close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="add-model-box">
+          <label for="newModelId">ID Model Resmi (Contoh: `black-forest-labs/flux-1-schnell`)</label>
+          <input type="text" id="newModelId" placeholder="Vendor/Model-Name">
+
+          <label for="newModelLabel">Label Tampilan (Contoh: `Flux Schnell [Hemat]`)</label>
+          <input type="text" id="newModelLabel" placeholder="Nama yang mudah diingat">
+
+          <button type="button" id="addNewModelBtn" class="btn-primary-sm">+ Tambahkan ke Daftar</button>
+        </div>
+
+        <div class="custom-models-list-wrapper">
+          <span class="list-title">Daftar Model Tersedia:</span>
+          <div id="modelListContainer" class="models-list">
+            <!-- Daftar model yang dapat dihapus/dipilih -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= BOTTOM NAVIGATION BAR ================= -->
+  <nav class="bottom-nav">
+    <button type="button" class="nav-item active" data-tab="tabStudio">
+      <span class="nav-icon">🎨</span>
+      <span class="nav-text">Studio</span>
+    </button>
+    <button type="button" class="nav-item" data-tab="tabGallery">
+      <span class="nav-icon">🖼️</span>
+      <span class="nav-text">Galeri</span>
+    </button>
+  </nav>
+
+  <script src="script.js"></script>
+</body>
+</html>
